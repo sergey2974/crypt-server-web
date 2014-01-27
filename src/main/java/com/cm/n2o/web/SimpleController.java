@@ -64,6 +64,7 @@ public class SimpleController {
             byte[] dataBytes = DatatypeConverter.parseHexBinary(data);
             char[] result = rc4.decrypt(new String(dataBytes).toCharArray());
             respStr = new String(result);
+
         } catch (Exception e) {
             e.printStackTrace();
         }
