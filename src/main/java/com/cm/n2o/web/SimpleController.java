@@ -24,20 +24,19 @@ public class SimpleController {
 
     @RequestMapping(value = "/crypt", method = RequestMethod.GET)
     @ResponseBody
-    public String crypt(@RequestParam("data") final String sid,
-                        @RequestParam("n") final String orderId,
-                        @RequestParam("sessionId") final String hmac,
+    public String crypt(@RequestParam("data") final String data,
+                        @RequestParam("n") final String n,
+                        @RequestParam("sessionId") final String sessionId,
                         HttpServletResponse response) {
         //response.setStatus(403);
-        simpleService.verify(1L, "");
         return "1";
     }
 
     @RequestMapping(value = "/decrypt", method = RequestMethod.GET)
     @ResponseBody
-    public String decrypt(@RequestParam("data") final String sid,
-                          @RequestParam("n") final String orderId,
-                          @RequestParam("sessionId") final String hmac,
+    public String decrypt(@RequestParam("data") final String data,
+                          @RequestParam("n") final String n,
+                          @RequestParam("sessionId") final String sessionId,
                           HttpServletResponse response) {
         //response.setStatus(403);
         return "1";
