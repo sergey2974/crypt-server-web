@@ -1,0 +1,156 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>com.cm.n2o</groupId>
+    <version>1.6.0-SNAPSHOT</version>
+    <artifactId>crypt-server-web</artifactId>
+
+    <packaging>war</packaging>
+
+    <scm>
+        <connection>scm:svn:https://xp-dev.com/svn/N2O/n2o-server/trunk/n2o-server-web</connection>
+        <developerConnection>scm:svn:https://xp-dev.com/svn/N2O/n2o-server/trunk/n2o-server-web</developerConnection>
+        <url>https://xp-dev.com/svn/N2O/n2o-server/trunk/n2o-server-web</url>
+    </scm>
+
+    <properties>
+        <n2o.profile>development</n2o.profile>
+        <!-- dependency versions -->
+        <spring.version>3.2.4.RELEASE</spring.version>
+        <slf4j-api.version>1.7.5</slf4j-api.version>
+        <!-- misc -->
+        <build.warName>${project.artifactId}</build.warName>
+        <!-- tomcat deployment -->
+    </properties>
+
+    <profiles>
+        <profile>
+            <id>test</id>
+            <activation>
+                <property>
+                    <name>n2o.profile</name>
+                    <value>test</value>
+                </property>
+            </activation>
+            <properties>
+                <n2o.profile>test</n2o.profile>
+                <tomcat7-maven-plugin.context-path>/public-test</tomcat7-maven-plugin.context-path>
+            </properties>
+        </profile>
+        <profile>
+            <id>deployment</id>
+            <activation>
+                <property>
+                    <name>n2o.deployment</name>
+                </property>
+            </activation>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.tomcat.maven</groupId>
+                        <artifactId>tomcat7-maven-plugin</artifactId>
+                        <version>2.1</version>
+                        <configuration>
+                            <update>true</update>
+                            <warFile>${project.build.directory}/${build.warName}.war</warFile>
+                        </configuration>
+                        <executions>
+                            <execution>
+                                <phase>deploy</phase>
+                                <goals>
+                                    <goal>deploy</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
+
+    <build>
+        <resources>
+            <resource>
+                <directory>profiles/${n2o.profile}</directory>
+            </resource>
+            <resource>
+                <directory>src/main/resources</directory>
+            </resource>
+        </resources>
+        <plugins>
+            <plugin>
+                <artifactId>maven-war-plugin</artifactId>
+                <version>2.4</version>
+                <configuration>
+                    <warName>${build.warName}</warName>
+                    <packagingExcludes>WEB-INF/web.xml</packagingExcludes>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+
+    <dependencies>
+        <dependency>
+            <groupId>javax.servlet</groupId>
+            <artifactId>servlet-api</artifactId>
+            <version>2.5</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>javax.servlet</groupId>
+            <artifactId>jstl</artifactId>
+            <version>1.2</version>
+        </dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+            <version>${slf4j-api.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>jcl-over-slf4j</artifactId>
+            <version>${slf4j-api.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>ch.qos.logback</groupId>
+            <artifactId>logback-classic</artifactId>
+            <version>1.0.13</version>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-core</artifactId>
+            <version>${spring.version}</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>commons-logging</groupId>
+                    <artifactId>commons-logging</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-context</artifactId>
+            <version>${spring.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-web</artifactId>
+            <version>${spring.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-webmvc</artifactId>
+            <version>${spring.version}</version>
+        </dependency>
+        <!-- TEST -->
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <version>4.11</version>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+
+</project>
