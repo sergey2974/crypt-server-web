@@ -5,6 +5,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.math.BigInteger;
 import java.nio.charset.Charset;
 import java.security.MessageDigest;
 
@@ -18,17 +19,19 @@ public class SimpleService {
         return true;
     }
 
-
-    static byte[] hash(final String algorithm, String input) {
-        return hash(algorithm, input.getBytes(Charset.forName("UTF-8")));
-    }
-
-    static byte[] hash(final String algorithm, final byte[] input) {
+    public String getMD5(String string) {
+        String hash = "";
         try {
-            final MessageDigest messageDigest = MessageDigest.getInstance(algorithm);
-            return messageDigest.digest(input);
-        } catch (Exception ex) {
-            throw new RuntimeException(ex);
+            MessageDigest md5;
+            md5 = MessageDigest.getInstance("MD5");
+            md5.reset();
+            md5.update(string.toString().getBytes());
+            byte[] digest = md5.digest();
+            BigInteger bigInt = new BigInteger(1, digest);
+            hash = String.format("%1$032x", bigInt);
+        } catch (Exception e) {
+            logger.error("hash calculation error", e);
         }
+        return hash;
     }
 }
