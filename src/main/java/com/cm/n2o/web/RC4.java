@@ -2,78 +2,117 @@ package com.cm.n2o.web;
 
 public class RC4 {
 
-    private char[] key;
-    private int[] sbox;
-    private static final int SBOX_LENGTH = 256;
-    private static final int KEY_MIN_LENGTH = 5;
+    private byte state[] = new byte[256];
+    private int x;
+    private int y;
 
-    public static void main(String[] args) {
-        try {
-            RC4 rc4 = new RC4("testkey");
-            char[] result = rc4.encrypt("hello there".toCharArray());
-            System.out.println("encrypted string:\n" + new String(result));
-            System.out.println("decrypted string:\n"
-                    + new String(rc4.decrypt(result)));
-        } catch (Exception e) {
-            System.err.println(e.getMessage());
-        }
+    /**
+     * Initializes the class with a string key. The length
+     * of a normal key should be between 1 and 2048 bits.  But
+     * this method doens't check the length at all.
+     *
+     * @param key   the encryption/decryption key
+     */
+    public RC4(String key) throws NullPointerException {
+        this(key.getBytes());
     }
 
-    public RC4(String key) throws Exception {
-        setKey(key);
-    }
+    /**
+     * Initializes the class with a byte array key.  The length
+     * of a normal key should be between 1 and 2048 bits.  But
+     * this method doens't check the length at all.
+     *
+     * @param key   the encryption/decryption key
+     */
+    public RC4(byte[] key) throws NullPointerException {
 
-    public RC4() {
-    }
-
-    public char[] decrypt(final char[] msg) {
-        return encrypt(msg);
-    }
-
-    public char[] encrypt(final char[] msg) {
-        sbox = initSBox(key);
-        char[] code = new char[msg.length];
-        int i = 0;
-        int j = 0;
-        for (int n = 0; n < msg.length; n++) {
-            i = (i + 1) % SBOX_LENGTH;
-            j = (j + sbox[i]) % SBOX_LENGTH;
-            swap(i, j, sbox);
-            int rand = sbox[(sbox[i] + sbox[j]) % SBOX_LENGTH];
-            code[n] = (char) (rand ^ (int) msg[n]);
-        }
-        return code;
-    }
-
-    private int[] initSBox(char[] key) {
-        int[] sbox = new int[SBOX_LENGTH];
-        int j = 0;
-
-        for (int i = 0; i < SBOX_LENGTH; i++) {
-            sbox[i] = i;
+        for (int i=0; i < 256; i++) {
+            state[i] = (byte)i;
         }
 
-        for (int i = 0; i < SBOX_LENGTH; i++) {
-            j = (j + sbox[i] + key[i % key.length]) % SBOX_LENGTH;
-            swap(i, j, sbox);
-        }
-        return sbox;
-    }
+        x = 0;
+        y = 0;
 
-    private void swap(int i, int j, int[] sbox) {
-        int temp = sbox[i];
-        sbox[i] = sbox[j];
-        sbox[j] = temp;
-    }
+        int index1 = 0;
+        int index2 = 0;
 
-    public void setKey(String key) throws Exception {
-        if (!(key.length() >= KEY_MIN_LENGTH && key.length() < SBOX_LENGTH)) {
-            throw new Exception("Key length has to be between "
-                    + KEY_MIN_LENGTH + " and " + (SBOX_LENGTH - 1));
+        byte tmp;
+
+        if (key == null || key.length == 0) {
+            throw new NullPointerException();
         }
 
-        this.key = key.toCharArray();
+        for (int i=0; i < 256; i++) {
+
+            index2 = ((key[index1] & 0xff) + (state[i] & 0xff) + index2) & 0xff;
+
+            tmp = state[i];
+            state[i] = state[index2];
+            state[index2] = tmp;
+
+            index1 = (index1 + 1) % key.length;
+        }
+
+
+
+    }
+
+    /**
+     * RC4 encryption/decryption.
+     *
+     * @param data  the data to be encrypted/decrypted
+     * @return the result of the encryption/decryption
+     */
+    public byte[] rc4(String data) {
+
+        if (data == null) {
+            return null;
+        }
+
+        byte[] tmp = data.getBytes();
+
+        this.rc4(tmp);
+
+        return tmp;
+    }
+
+    /**
+     * RC4 encryption/decryption.
+     *
+     * @param buf  the data to be encrypted/decrypted
+     * @return the result of the encryption/decryption
+     */
+    public byte[] rc4(byte[] buf) {
+
+        //int lx = this.x;
+        //int ly = this.y;
+
+        int xorIndex;
+        byte tmp;
+
+        if (buf == null) {
+            return null;
+        }
+
+        byte[] result = new byte[buf.length];
+
+        for (int i=0; i < buf.length; i++) {
+
+            x = (x + 1) & 0xff;
+            y = ((state[x] & 0xff) + y) & 0xff;
+
+            tmp = state[x];
+            state[x] = state[y];
+            state[y] = tmp;
+
+            xorIndex = ((state[x] &0xff) + (state[y] & 0xff)) & 0xff;
+            result[i] = (byte)(buf[i] ^ state[xorIndex]);
+        }
+
+        //this.x = lx;
+        //this.y = ly;
+
+        return result;
     }
 
 }
-

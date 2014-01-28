@@ -41,9 +41,8 @@ public class SimpleController {
         try {
             String keyStr = simpleService.getMD5(n + sessionId + "KeyString");
             RC4 rc4 = new RC4(keyStr);
-            char[] result = rc4.encrypt(data.toCharArray());
-            byte[] bytes = Charset.forName("UTF-8").encode(CharBuffer.wrap(result)).array();
-            respStr = DatatypeConverter.printHexBinary(bytes);
+            byte[] encrypted = rc4.rc4(data.getBytes("UTF-8"));
+            respStr = DatatypeConverter.printHexBinary(encrypted);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -59,12 +58,11 @@ public class SimpleController {
 
         String respStr = "";
         try {
+            byte[] encryptedData = DatatypeConverter.parseHexBinary(data);
             String keyStr = simpleService.getMD5(n + sessionId + "KeyString");
             RC4 rc4 = new RC4(keyStr);
-            byte[] dataBytes = DatatypeConverter.parseHexBinary(data);
-            char[] result = rc4.decrypt(new String(dataBytes).toCharArray());
-            respStr = new String(result);
-
+            byte[] decrypted = rc4.rc4(encryptedData);
+            respStr = new String(decrypted,"UTF-8");
         } catch (Exception e) {
             e.printStackTrace();
         }
