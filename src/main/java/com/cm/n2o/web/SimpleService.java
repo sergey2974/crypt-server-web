@@ -5,6 +5,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import javax.xml.bind.DatatypeConverter;
 import java.math.BigInteger;
 import java.nio.charset.Charset;
 import java.security.MessageDigest;
@@ -33,5 +34,30 @@ public class SimpleService {
             logger.error("hash calculation error", e);
         }
         return hash;
+    }
+
+    public String encrypt(String data, String keyStr) {
+        String respStr = "";
+        try {
+            RC4 rc4 = new RC4(keyStr);
+            byte[] encrypted = rc4.rc4(data.getBytes("UTF-8"));
+            respStr = DatatypeConverter.printHexBinary(encrypted);
+        } catch (Exception e) {
+            logger.error("Encryption error", e);
+        }
+        return respStr;
+    }
+
+    public String decrypt(String data, String keyStr) {
+        String respStr = "";
+        try {
+            byte[] encryptedData = DatatypeConverter.parseHexBinary(data);
+            RC4 rc4 = new RC4(keyStr);
+            byte[] decrypted = rc4.rc4(encryptedData);
+            respStr = new String(decrypted, "UTF-8");
+        } catch (Exception e) {
+            logger.error("Decryption error", e);
+        }
+        return respStr;
     }
 }

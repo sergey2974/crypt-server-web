@@ -1,7 +1,10 @@
 package com.cm.n2o.web;
 
 import org.apache.commons.codec.binary.Hex;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -20,6 +23,12 @@ import java.nio.charset.Charset;
 @Controller
 public class SimpleController {
 
+    private static final Logger logger = LoggerFactory.getLogger(SimpleController.class);
+
+    @Value("${keyString}")
+    private String keyString;
+
+
     @Autowired
     private SimpleService simpleService;
 
@@ -35,16 +44,12 @@ public class SimpleController {
                         @RequestParam("n") final String n,
                         @RequestParam("sessionId") final String sessionId,
                         HttpServletResponse response) {
-        //response.setStatus(403);
         String respStr = "";
-
         try {
-            String keyStr = simpleService.getMD5(n + sessionId + "KeyString");
-            RC4 rc4 = new RC4(keyStr);
-            byte[] encrypted = rc4.rc4(data.getBytes("UTF-8"));
-            respStr = DatatypeConverter.printHexBinary(encrypted);
+            String keyStr = simpleService.getMD5(n + sessionId + keyString);
+            respStr = simpleService.encrypt(data, keyStr);
         } catch (Exception e) {
-            e.printStackTrace();
+            logger.error("Crypt error", e);
         }
         return respStr;
     }
@@ -58,13 +63,10 @@ public class SimpleController {
 
         String respStr = "";
         try {
-            byte[] encryptedData = DatatypeConverter.parseHexBinary(data);
-            String keyStr = simpleService.getMD5(n + sessionId + "KeyString");
-            RC4 rc4 = new RC4(keyStr);
-            byte[] decrypted = rc4.rc4(encryptedData);
-            respStr = new String(decrypted,"UTF-8");
+            String keyStr = simpleService.getMD5(n + sessionId + keyString);
+            respStr = simpleService.decrypt(data, keyStr);
         } catch (Exception e) {
-            e.printStackTrace();
+            logger.error("Decrypt error", e);
         }
         return respStr;
     }
